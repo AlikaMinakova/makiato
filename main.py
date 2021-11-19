@@ -52,7 +52,7 @@ class DBSample(QMainWindow):
 class SecondWindow(QMainWindow):
     def __init__(self, parent=None):
         super(SecondWindow, self).__init__(parent)
-        uic.loadUi('untitled2.ui', self)
+        uic.loadUi('addEditCoffeeForm.ui', self)
         a = ['молотый', 'в зёрнах']
         b = ['светлая', 'средняя', 'средне-тёмная', 'тёмная', 'очень тёмная']
         self.comboBox.addItems(a)
