@@ -1,14 +1,15 @@
 import sqlite3
 import sys
-from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
+import addEditCoffeeForm
+import untitled
 
 
-class DBSample(QMainWindow):
+class DBSample(QMainWindow, untitled.Ui_MainWindow):
     def __init__(self):
         super(DBSample, self).__init__()
-        uic.loadUi('untitled.ui', self)
+        self.setupUi(self)
         self.con = sqlite3.connect("coffee.db")
         self.modified = {}
         self.pushButton.clicked.connect(self.select_data)
@@ -32,10 +33,10 @@ class DBSample(QMainWindow):
         self.modified = {}
 
 
-class SecondWindow(QMainWindow):
+class SecondWindow(QMainWindow, addEditCoffeeForm.Ui_MainWindow):
     def __init__(self, parent=None):
         super(SecondWindow, self).__init__(parent)
-        uic.loadUi('addEditCoffeeForm.ui', self)
+        self.setupUi(self)
         a = ['молотый', 'в зёрнах']
         b = ['светлая', 'средняя', 'средне-тёмная', 'тёмная', 'очень тёмная']
         self.con = sqlite3.connect("coffee.db")
