@@ -11,10 +11,8 @@ class DBSample(QMainWindow):
         uic.loadUi('untitled.ui', self)
         self.con = sqlite3.connect("coffee.db")
         self.modified = {}
-        self.tableWidget.itemChanged.connect(self.item_changed)
         self.pushButton.clicked.connect(self.select_data)
         self.pushButton_2.clicked.connect(self.show_window_2)
-        self.pushButton_4.clicked.connect(self.save_results)
         self.select_data()
 
     def show_window_2(self):
@@ -33,9 +31,36 @@ class DBSample(QMainWindow):
                 self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))
         self.modified = {}
 
-    def item_changed(self, item):
-        self.modified[self.titles[item.column()]] = item.text()
-        self.row = item.row() + 1
+
+class SecondWindow(QMainWindow):
+    def __init__(self, parent=None):
+        super(SecondWindow, self).__init__(parent)
+        uic.loadUi('addEditCoffeeForm.ui', self)
+        a = ['молотый', 'в зёрнах']
+        b = ['светлая', 'средняя', 'средне-тёмная', 'тёмная', 'очень тёмная']
+        self.con = sqlite3.connect("coffee.db")
+        self.modified = {}
+        self.comboBox.addItems(a)
+        self.tableWidget.itemChanged.connect(self.item_changed)
+        self.comboBox_2.addItems(b)
+        self.pushButton.clicked.connect(self.addition)
+        self.pushButton_3.clicked.connect(self.save_results)
+        self.select_data()
+
+    def select_data(self):
+        cur = self.con.cursor()
+        result = cur.execute("SELECT * FROM coffee").fetchall()
+        self.tableWidget.setRowCount(len(result))
+        self.tableWidget.setColumnCount(len(result[0]))
+        self.titles = [description[0] for description in cur.description]
+        self.tableWidget.setHorizontalHeaderLabels(self.titles)
+        for i, elem in enumerate(result):
+            for j, val in enumerate(elem):
+                self.tableWidget.setItem(i, j, QTableWidgetItem(str(val)))
+        self.modified = {}
+
+    def close1(self):
+        self.addition()
 
     def save_results(self):
         if self.modified:
@@ -47,22 +72,10 @@ class DBSample(QMainWindow):
             cur.execute(que, (self.row,))
             self.con.commit()
             self.modified.clear()
-
-
-class SecondWindow(QMainWindow):
-    def __init__(self, parent=None):
-        super(SecondWindow, self).__init__(parent)
-        uic.loadUi('addEditCoffeeForm.ui', self)
-        a = ['молотый', 'в зёрнах']
-        b = ['светлая', 'средняя', 'средне-тёмная', 'тёмная', 'очень тёмная']
-        self.comboBox.addItems(a)
-        self.comboBox_2.addItems(b)
-        self.pushButton_3.clicked.connect(self.close1)
-
-    def close1(self):
-        self.addition()
+        self.destroy()
 
     def addition(self):
+        self.statusBar().showMessage('')
         self.name = self.lineEdit.text()
         self.degree = self.comboBox_2.currentText()
         self.vid = self.comboBox.currentText()
@@ -70,6 +83,10 @@ class SecondWindow(QMainWindow):
         self.prise = self.lineEdit_4.text()
         self.valume = self.lineEdit_5.text()
         self.finish(self.name, self.degree, self.vid, self.tasty, self.prise, self.valume)
+
+    def item_changed(self, item):
+        self.modified[self.titles[item.column()]] = item.text()
+        self.row = item.row() + 1
 
     def finish(self, a, b, c, d, e, f):
         if a != '' and d != '' and e != '' and f != '':
@@ -79,7 +96,6 @@ class SecondWindow(QMainWindow):
                 cur.execute("""INSERT INTO coffee(title_grade, degreeroasting, processing,
                  descriptiontype, price, volume) VALUES(?, ?, ?, ?, ?, ?)""", (a, b, c, d, e, f)).fetchall()
                 self.con.commit()
-                self.destroy()
             else:
                 self.statusBar().showMessage('Проверьте коректность введённых данных')
         else:
